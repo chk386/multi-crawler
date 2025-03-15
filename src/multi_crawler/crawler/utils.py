@@ -28,7 +28,7 @@ def get_text_or_empty(page: WebElement, by: str, value: str) -> str:
 
 
 def selected_elems(driver: WebDriver, by: str, selector: str) -> list[WebElement]:
-    return WebDriverWait(driver, 3).until(
+    return WebDriverWait(driver, 10).until(
         method=ec.presence_of_all_elements_located((by, selector))
     )
 
