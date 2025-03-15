@@ -1,0 +1,11 @@
+{
+    "pylint.enabled": false,
+    "python.analysis.diagnosticSeverityOverrides": {
+        "reportMissingTypeStubs": "none",
+        "reportUnknownMemberType": "none",
+    },
+    "ruff.codeAction.disableRuleComment": {
+        "enable": false
+    },
+    "ruff.lineLength": 88
+}

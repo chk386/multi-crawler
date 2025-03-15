@@ -1,0 +1,42 @@
+[project]
+name = "multi-crawler"
+version = "0.1.0"
+description = ""
+authors = [{ name = "haekyu.cho", email = "haekyu.cho@nhn-commerce.com" }]
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = ["customtkinter (>=5.2.2,<6.0.0)", "aiohttp (>=3.11.13,<4.0.0)", "beautifulsoup4 (>=4.13.3,<5.0.0)", "pandas (>=2.2.3,<3.0.0)", "selenium (>=4.29.0,<5.0.0)"]
+
+[tool.poetry]
+packages = [{ include = "multi_crawler", from = "src" }]
+
+[tool.ruff]
+# 린팅 규칙 설정
+line-length = 88
+select = [
+    "E",   # 에러 (PEP 8 위반)
+    "F",   # 코드 스타일 (PEP 8 위반)
+    "W",   # 경고 (PEP 8 위반)
+    "I",   # import 정렬
+    "B",   # 버그 가능성
+    "C",   # 복잡도
+    "N",   # 명명 규칙
+    "UP",  # 업그레이드 호환성
+    "YTT", # 타입 힌트
+]
+ignore = [
+    "E203", # 콜론 주변의 공백 (black과 충돌 방지)
+]
+
+[tool.ruff.per-file-ignores]
+# 특정 파일에 대한 린팅 규칙 무시
+"tests/*" = ["E501"] # 테스트 파일에서 줄 길이 제한 무시
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.5"
+ruff = "^0.11.0"
+pre-commit = "^4.1.0"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
