@@ -4,8 +4,11 @@
         "reportMissingTypeStubs": "none",
         "reportUnknownMemberType": "none",
     },
-    "ruff.codeAction.disableRuleComment": {
-        "enable": false
-    },
-    "ruff.lineLength": 88
+    "ruff.lineLength": 88,
+    "editor.formatOnSave": true,
+    "ruff.organizeImports": true,
+    "ruff.enable": true,
+    "python.analysis.extraPaths": [
+        "./src",
+    ],
 }
