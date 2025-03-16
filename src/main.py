@@ -1,4 +1,7 @@
-from multi_crawler.crawler.agencies import do_agencies_info_crawling, to_database
+from multi_crawler.crawler.agencies import (
+    do_agencies_info_crawling,
+    to_database,  # type: ignore
+)
 
 if __name__ == "__main__":
     print("크롤러 GUI 시작")

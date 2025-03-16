@@ -2,6 +2,7 @@
 
 import time
 
+from icecream import ic
 import requests
 from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.common.by import By
@@ -12,14 +13,14 @@ from utils import (
 )
 
 categories = [
-    # 236,
-    # 240,
-    # 1006,
-    # 1003,
-    # 239,
-    # 1004,
-    # 237,
-    # 1002,
+    236,
+    240,
+    1006,
+    1003,
+    239,
+    1004,
+    237,
+    1002,
     803,
     823,
     233,
@@ -33,17 +34,18 @@ categories = [
 
 
 def get_all_skin_codes() -> set[str]:
-    print("스킨 크롤링을 시작합니다.")
+    ic("스킨 코드 크롤링 시작!")
+
     start_time = time.time()
 
-    driver: WebDriver = get_webdriver()
+    driver: WebDriver = get_webdriver(True)
     skin_codes: set[str] = set()
 
     try:
         # 스킨 카테고리 조회 페이지
         for no in categories:
             url = f"https://d.cafe24.com/category?display=PTMD&no={no}"
-            print(f"스킨 카테고리 목록 url : {url}\n")
+            ic(f"스킨 카테고리 목록 url : {url}\n")
 
             driver.get(url=url)
 
@@ -51,18 +53,19 @@ def get_all_skin_codes() -> set[str]:
             move_scroll(driver)
 
             results = get_skin_codes(driver)
-            print(f"스킨 코드 카운트 : {len(results)}, categoryNo : {no}\n")
+            ic(f"스킨 코드 카운트 : {len(results)}, categoryNo : {no}\n")
 
             skin_codes.update(results)
-            # https://d.cafe24.com/product/product_detail?productCode=PTMD844984
 
     except:
-        print("스킨킨 크롤링 중 에러 발생")
+        ic("스킨킨 크롤링 중 에러 발생\n스냅샷 생성")
+        driver.save_screenshot("screenshot-error.png")
+
         raise
     finally:
-        print("스킨 크롤링을 종료합니다.\n")
+        ic("스킨 크롤링을 종료합니다.\n")
         end_time = time.time()
-        print(f"스킨 목록 크롤링 소요시간 : {end_time - start_time:.2f}초")
+        ic(f"스킨 목록 크롤링 소요시간 : {end_time - start_time:.2f}초")
 
         driver.quit()
 
@@ -70,7 +73,7 @@ def get_all_skin_codes() -> set[str]:
 
 
 def get_skin_codes(driver: WebDriver) -> set[str]:
-    # fixme: skin_codes는 중복을 수 있다.
+    # fixme: skin_codes는 중복일 수 있다.
     skin_codes: list[str] = []
     skin_elems = selected_elems(driver, By.CSS_SELECTOR, ".items-wrap > a.link")
 
@@ -115,14 +118,8 @@ def extract(line: str, sep: str) -> str:
     return ""
 
 
-if __name__ == "__main__":
-    codes = get_all_skin_codes()
+def extract_skin_infos(codes: set[str]):
     datas: list[dict[str, str | int | float]] = []
-
-    # to_database("multi-crawler", "skin_codes", codes)
-
-    # sqlite skin_codes 셀렉해서 dataFrame으로 변환
-    # https://d.cafe24.com/product/product_detail?productCode={code} 형태로 순회
 
     for code in codes:
         url = f"https://d.cafe24.com/product/product_detail?productCode={code}"
@@ -197,11 +194,14 @@ if __name__ == "__main__":
 
                     datas.append(data)
 
-    to_database("multi-crawler", "skin_info", datas)
-
-    #             # 파일에 저장
-    #             with open("output.txt", "w", encoding="utf-8") as file:
-    #                 file.write(one_line)
+        return datas
 
 
-# if __name__ == "__main__":
+if __name__ == "__main__":
+    print("스킨 크롤링을 시작합니다.")
+
+    codes = get_all_skin_codes()
+    to_database("multi-crawler", "skin_codes", codes)  # type: ignore
+
+    skin_datas = extract_skin_infos(codes)
+    to_database("multi-crawler", "skin_info", skin_datas)  # type: ignore
