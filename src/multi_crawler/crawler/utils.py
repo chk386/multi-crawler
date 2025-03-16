@@ -16,7 +16,8 @@ def get_webdriver():
     chrome_options = Options()
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
-    # chrome_options.add_argument("--headless")  # 헤드리스 모드 실행
+    # chrome_options.add_arg
+    # ument("--headless")  # 헤드리스 모드 실행
 
     # WebDriver 설정 (시스템에 설치된 ChromeDriver 사용)
     return webdriver.Chrome(options=chrome_options)

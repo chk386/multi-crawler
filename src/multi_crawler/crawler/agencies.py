@@ -14,7 +14,7 @@ from utils import (
     get_webdriver,
     is_element_exist,
     selected_elems,
-    to_database,
+    to_database,  # type: ignore
 )
 
 # from config.app_logging import logger
@@ -32,6 +32,8 @@ def get_agency_info(driver: WebDriver, page: WebElement):
     entry_date = page.find_element(
         By.CSS_SELECTOR, "div.last > span:nth-child(2)"
     ).text.split(" ")[0]
+
+    agency_name = get_text_or_empty(page, By.CLASS_NAME, "shop-name")
 
     agency_selector = "#designer-info > dl > dd:nth-child({})"
 
@@ -76,6 +78,7 @@ def get_agency_info(driver: WebDriver, page: WebElement):
 
     data: dict[str, str | int | datetime] = {
         "agency_id": agency_id,
+        "agency_name": agency_name,
         "entry_date": entry_date,
         "business_number": business_number,
         "business_address": business_address,
@@ -94,7 +97,7 @@ def get_agency_info(driver: WebDriver, page: WebElement):
 
 
 def do_agencies_info_crawling():
-    print("에이전시 크롤링을 시작합니다.")
+    print("에이전시 목록 크롤링 시작합니다.")
     start_time = time.time()
     datas: list[dict[str, str | int | datetime]] = []
     driver = get_webdriver()
