@@ -1,7 +1,5 @@
 import time
 from datetime import datetime
-
-# from pprint import pprint
 from urllib.parse import parse_qs, urlparse
 
 from selenium.webdriver.chrome.webdriver import WebDriver
@@ -17,7 +15,6 @@ from utils import (
     to_database,  # type: ignore
 )
 
-# from config.app_logging import logger
 sleep_time = 0
 
 
