@@ -16,6 +16,13 @@ def get_webdriver(is_headless: bool = False):
     chrome_options = Options()
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("--disable-blink-features=AutomationControlled")
+    chrome_options.add_argument("user-data-dir=/chrome-user-data")
+
+    # 브로우저가 자동 종료 방지 옵션
+    chrome_options.add_experimental_option("detach", True)
+    # 콘솔 출력 방지
+    chrome_options.add_experimental_option("excludeSwitches", ["enable-logging"])
 
     if is_headless:
         chrome_options.add_argument("--headless")  # 헤드리스 모드 실행
