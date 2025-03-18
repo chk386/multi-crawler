@@ -1,7 +1,7 @@
 import sqlite3
-from datetime import datetime
 
 import pandas as pd
+from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.chrome.options import Options
@@ -59,3 +59,28 @@ def to_database(name: str, table_name: str, datas: list[any]):  # type: ignore
     # df.to_excel(f"{name}.xlsx", index=False)
 
     return df
+
+
+# 허용되지 않는 문자 제거 함수
+def remove_illegal_chars(text):  # type: ignore
+    if isinstance(text, str):
+        # 제어 문자 제거 (ASCII 0~31)
+        return text.translate(str.maketrans("", "", "".join(map(chr, range(32)))))
+    return text  # type: ignore
+
+
+def to_excel(name: str, datas: list[any]):  # type: ignore
+    df = pd.DataFrame(datas)
+    df = df.map(remove_illegal_chars)
+
+    df.to_excel(f"{name}.xlsx", index=False)
+
+
+def get_text_or_empty_in_bs(bs: BeautifulSoup, selector: str):
+    app_title = bs.select_one(selector)
+    if app_title:
+        app_title = str(app_title.text)
+    else:
+        app_title = ""
+
+    return app_title
