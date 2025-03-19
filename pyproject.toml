@@ -37,6 +37,8 @@ select = [
 ]
 ignore = [
     "E203", # 콜론 주변의 공백 (black과 충돌 방지)
+    "F403", # import * 무시
+    "F405", # import * 무시
 ]
 
 [tool.ruff.per-file-ignores]

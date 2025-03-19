@@ -1,14 +1,14 @@
 {
-    "pylint.enabled": false,
-    "python.analysis.diagnosticSeverityOverrides": {
-        "reportMissingTypeStubs": "none",
-        "reportUnknownMemberType": "none",
-    },
-    "ruff.lineLength": 88,
-    "editor.formatOnSave": true,
-    "ruff.organizeImports": true,
-    "ruff.enable": true,
-    "python.analysis.extraPaths": [
-        "./src",
-    ],
+  "pylint.enabled": false,
+  "python.analysis.diagnosticSeverityOverrides": {
+    "reportMissingTypeStubs": "none",
+    "reportUnknownMemberType": "none",
+    "reportWildcardImportFromLibrary": "none"
+  },
+
+  "ruff.lineLength": 88,
+  "editor.formatOnSave": true,
+  "ruff.organizeImports": true,
+  "ruff.enable": true,
+  "python.analysis.extraPaths": ["./src"]
 }
