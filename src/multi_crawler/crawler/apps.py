@@ -7,7 +7,6 @@ from icecream import ic
 from multi_crawler.crawler.utils import (
     get_text_or_empty_in_bs,
     to_database,  # type: ignore
-    to_excel,
 )
 
 cookies = {
@@ -59,7 +58,7 @@ def extract_app_urls(page: int) -> list[str]:
         }
 
         response = requests.get(
-            "https://store.cafe24.com/kr/filter/rest/apps",
+            url="https://store.cafe24.com/kr/filter/rest/apps",
             params=params,
             cookies=cookies,
             headers=headers,
@@ -76,7 +75,7 @@ def extract_app_urls(page: int) -> list[str]:
             bs = soup.select(selector=".inner >.js-gtm-search-app")
 
             uri = [str(b.get("href")) for b in bs]
-            ic(f"주소 추출 : {uri}")
+            ic(f"앱 상세 주소 정보 조회 : {uri}")
             uris.extend(uri)
 
         else:
@@ -110,10 +109,6 @@ def extrace_app_infos(app_paths: list[str]):
                 ),
                 "review_avg_score": get_text_or_empty_in_bs(bs, ".average"),
                 "review_cnt": get_text_or_empty_in_bs(bs, "span.review > a > span"),
-                # "category": get_text_or_empty_in_bs(
-                #     bs,
-                #     "div.infoProductWrap > div.infoListArea > ul > li:nth-child(2) > p > span",
-                # ),
                 "faq_list": get_text_or_empty_in_bs(bs, "#app_faq_list"),
                 "inquiry_list": get_text_or_empty_in_bs(bs, "#js-inquiry-list-div"),
                 "recent_review_list": get_text_or_empty_in_bs(bs, "#comment_list"),
@@ -127,11 +122,13 @@ def extrace_app_infos(app_paths: list[str]):
     return datas
 
 
-if __name__ == "__main__":
+def extract_apps():
     app_paths = extract_app_urls(page=1)
-    df = to_database("multi-crawler", "app_uris", app_paths)  # type: ignore
+    to_database("multi-crawler", "app_uris", app_paths)
 
     app_infos = extrace_app_infos(app_paths)
-
     to_database("multi-crawler", "app_info", app_infos)
-    to_excel("app_info", app_infos)
+
+
+if __name__ == "__main__":
+    extract_apps()

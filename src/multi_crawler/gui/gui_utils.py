@@ -1,4 +1,5 @@
 from functools import wraps
+from time import time
 from typing import no_type_check
 
 
@@ -17,8 +18,7 @@ def throttle(delay: int):
         @no_type_check
         def wrapper(self, *args, **kwargs):
             nonlocal last_call_time, scheduled_id
-
-            current_time = time.time() * 1000
+            current_time = time() * 1000
 
             # 이전에 예약된 호출이 있으면 취소
             if scheduled_id is not None:

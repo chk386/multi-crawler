@@ -1,3 +1,4 @@
+from datetime import datetime
 import math
 import tkinter
 import tkinter.messagebox
@@ -7,13 +8,11 @@ from tkinter import filedialog
 from customtkinter import *
 from icecream import ic
 
+from multi_crawler.crawler.agencies import extract_agencies
+from multi_crawler.crawler.apps import extract_apps
+from multi_crawler.crawler.skins import extract_skins
 from multi_crawler.crawler.utils import get_count_table, to_excel
 from multi_crawler.gui.gui_utils import throttle  # type: ignore
-from multi_crawler.crawler.agencies import (
-    do_agencies_info_crawling,
-    to_database,  # type: ignore
-)
-from multi_crawler.crawler.skins import extract_skin_infos, get_all_skin_codes
 
 
 class ButtonType(Enum):
@@ -42,6 +41,21 @@ class App(CTk):
         # 왼쪽-중단 Frame
         self._init_left_middle_frame()
 
+        # 오른쪽 - Log
+        self.textbox = CTkTextbox(self, height=760, font=("Arial", 14))
+        self.textbox.insert(
+            "0.0",
+            "로그 출력\n\n",
+        )
+
+        self.textbox.grid(
+            row=0, column=1, rowspan=2, padx=(20, 20), pady=(20, 40), sticky="nsew"
+        )
+
+        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        self.textbox.insert("end", f"{current_time} : 새로운 로그 항목\n")
+        # self.textbox.delete("2.0", "end")
+
         # 랜더링
         self._render_entry_data()
 
@@ -63,7 +77,7 @@ class App(CTk):
     def _init_left_middle_frame(self):
         self.left_middle_frame = CTkFrame(self, corner_radius=0)
         self.left_middle_frame.grid(
-            row=1, column=0, padx=(20, 0), pady=(20, 0), sticky="ew"
+            row=1, column=0, padx=(20, 0), pady=(20, 400), sticky="sew"
         )
 
         self.left_middle_frame.grid_columnconfigure(0, weight=1)
@@ -159,7 +173,7 @@ class App(CTk):
         # 왼쪽-상단 Frame
         self.left_top_frame = CTkFrame(self, corner_radius=1)
         self.left_top_frame.grid(
-            row=0, column=0, padx=(20, 0), pady=(20, 0), sticky="nswe"
+            row=0, column=0, padx=(20, 0), pady=(20, 0), sticky="nwe"
         )
 
         self.left_top_frame.grid_columnconfigure((0, 1), weight=1)
@@ -173,8 +187,8 @@ class App(CTk):
 
         self.config_label.grid(row=0, column=0, columnspan=2, padx=0, pady=(20, 0))
 
-        switch = CTkSwitch(master=self.left_top_frame, text="브라우저 실행모드")
-        switch.grid(
+        self.switch = CTkSwitch(master=self.left_top_frame, text="브라우저 실행모드")
+        self.switch.grid(
             row=1, column=0, columnspan=2, padx=(20, 0), pady=(20, 0), sticky="w"
         )
 
@@ -212,6 +226,8 @@ class App(CTk):
             stringvar = type_to_stringvar.get(type, self.app_entry_stringvar)
             stringvar.set(self._get_entry_text(text, cnt))
 
+        self.slider_label_text = 0
+
     def _save_file(self, type: ButtonType):
         """파일 저장 대화상자를 열고 파일을 저장하는 함수"""
         # 파일 저장 대화상자 열기
@@ -237,16 +253,25 @@ class App(CTk):
                 ic(e)
                 tkinter.messagebox.showerror("다운로드 실패", f"{e} 에러 발생")
         else:
-            ic("asd")
             tkinter.messagebox.showwarning("다운로드 취소", "취소 완료")
 
     def _get_entry_text(self, text: str, cnt: int):
         return text % (str(cnt)).rjust(5)
 
     def _extract_data(self, type: ButtonType):
-        # 에이전시 크롤링 고고
-        datas = do_agencies_info_crawling(False)
-        to_database("multi-crawler", "agency_info", datas)
+        is_headless = self.switch.get() == 1
+
+        params = (is_headless, self.slider_label_text, self.textbox)
+
+        # fixme: is_headless, delay, log
+        if type == ButtonType.SKIN:
+            extract_skins(params)
+        elif type == ButtonType.AGENCY:
+            extract_agencies(is_headless)
+        else:
+            extract_apps()
+
+        self._render_entry_data()
 
     @throttle(delay=500)
     def _slider_change_event(self, value: float):

@@ -1,5 +1,3 @@
-# https://d.cafe24.com/category?display=PTMD&no=236
-
 import time
 
 import requests
@@ -10,8 +8,10 @@ from selenium.webdriver.common.by import By
 from multi_crawler.crawler.utils import (
     get_webdriver,
     selected_elems,
-    to_database,  # type: ignore
+    get_current_time,
 )
+
+from customtkinter import CTkTextbox
 
 categories = [
     236,
@@ -34,12 +34,16 @@ categories = [
 ]
 
 
-def get_all_skin_codes() -> set[str]:
+def get_all_skin_codes(
+    is_headless: bool, delay_time: int, textbox: CTkTextbox
+) -> set[str]:
+    textbox.insert("end", f"{get_current_time()} : 스킨 코드 크롤링 시작!")
+
     ic("스킨 코드 크롤링 시작!")
 
     start_time = time.time()
 
-    driver: WebDriver = get_webdriver(True)
+    driver: WebDriver = get_webdriver(is_headless)
     skin_codes: set[str] = set()
 
     try:
@@ -95,7 +99,7 @@ def move_scroll(driver: WebDriver):
 
     while True:
         for _ in range(0, 5):
-            # 스크롤 내리기
+            # 스크롤 내리기c
             driver.execute_script("window.scrollBy(0, 200);")
 
             # 페이지 로딩 대기
@@ -198,11 +202,17 @@ def extract_skin_infos(codes: set[str]):
         return datas
 
 
-if __name__ == "__main__":
-    print("스킨 크롤링을 시작합니다.")
+def extract_skins(params: tuple[bool, int, CTkTextbox]):
+    is_headless, delay_time, textbox = params
 
-    codes = get_all_skin_codes()
+    codes = get_all_skin_codes(is_headless, delay_time, textbox)
     to_database("multi-crawler", "skin_codes", codes)  # type: ignore
 
     skin_datas = extract_skin_infos(codes)
     to_database("multi-crawler", "skin_info", skin_datas)  # type: ignore
+
+
+if __name__ == "__main__":
+    print("스킨 크롤링을 시작합니다.")
+
+    # extract_skins(False)

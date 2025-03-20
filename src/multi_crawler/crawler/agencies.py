@@ -2,6 +2,7 @@ import time
 from datetime import datetime
 from urllib.parse import parse_qs, urlparse
 
+from icecream import ic
 from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
@@ -21,7 +22,7 @@ sleep_time = 0
 
 def get_agency_info(driver: WebDriver, page: WebElement):
     agency_url = driver.current_url
-    print(f"에이전시 페이지 : {agency_url}")
+    ic(f"에이전시 페이지 : {agency_url}")
 
     url_parsed = urlparse(agency_url)
     query_params = parse_qs(url_parsed.query)
@@ -95,7 +96,7 @@ def get_agency_info(driver: WebDriver, page: WebElement):
 
 
 def do_agencies_info_crawling(is_headless: bool):
-    print("에이전시 목록 크롤링 시작합니다.")
+    ic("에이전시 목록 크롤링 시작합니다.")
     start_time = time.time()
     datas: list[dict[str, str | int | datetime]] = []
     driver = get_webdriver(is_headless)
@@ -106,7 +107,7 @@ def do_agencies_info_crawling(is_headless: bool):
 
         while True:
             url = f"https://d.cafe24.com/designer/designer_main?safety=Y&order=REG_ASC&pageNo={page_no}&isActive=T"
-            print(f"페이지번호 : {page_no}, url : {url}")
+            ic(f"페이지번호 : {page_no}, url : {url}")
 
             page_no += 1
             driver.get(url)
@@ -143,20 +144,25 @@ def do_agencies_info_crawling(is_headless: bool):
                 driver.get(url=url)
 
     except:
-        print("에이전시 크롤링 중 에러 발생")
+        ic("에이전시 크롤링 중 에러 발생")
         raise
     finally:
-        print(f"총 {len(datas)}개의 에이전시 정보를 저장하였습니다.")
-        print("에이전시 크롤링을 종료합니다.")
+        ic(f"총 {len(datas)}개의 에이전시 정보를 저장하였습니다.")
+        ic("에이전시 크롤링을 종료합니다.")
         end_time = time.time()
-        print(f"에이전시 목록 크롤링 소요시간 : {end_time - start_time:.2f}초")
+        ic(f"에이전시 목록 크롤링 소요시간 : {end_time - start_time:.2f}초")
         # 브라우저 종료
         driver.quit()
 
     return datas
 
 
-if __name__ == "__main__":
-
-    datas: list[dict[str, str | int | datetime]] = do_agencies_info_crawling()
+def extract_agencies(is_headless: bool):
+    datas: list[dict[str, str | int | datetime]] = do_agencies_info_crawling(
+        is_headless
+    )
     to_database("multi-crawler", "agency_info", datas)
+
+
+if __name__ == "__main__":
+    extract_agencies(False)

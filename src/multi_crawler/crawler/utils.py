@@ -1,6 +1,9 @@
+from datetime import datetime
 import sqlite3
+from pathlib import Path
 
 import pandas as pd
+from appdirs import user_data_dir  # type: ignore
 from bs4 import BeautifulSoup
 from icecream import ic
 from pandas.errors import DatabaseError
@@ -13,13 +16,21 @@ from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.ui import WebDriverWait
 
 
+def get_chrome_user_data():
+    chrome_user_data_dir = str(user_data_dir("multi-crawler"))  # type: ignore
+    directory_path = Path(chrome_user_data_dir)
+    directory_path.mkdir(parents=True, exist_ok=True)
+
+    return chrome_user_data_dir
+
+
 def get_webdriver(is_headless: bool = False):
     # Chrome 옵션 설정
     chrome_options = Options()
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--disable-blink-features=AutomationControlled")
-    chrome_options.add_argument("user-data-dir=/chrome-user-data")
+    chrome_options.add_argument(f"user-data-dir={get_chrome_user_data()}")
 
     # 브로우저가 자동 종료 방지 옵션
     chrome_options.add_experimental_option("detach", True)
@@ -36,6 +47,10 @@ def get_webdriver(is_headless: bool = False):
 def get_text_or_empty(page: WebElement, by: str, value: str) -> str:
     elems = page.find_elements(by, value)
     return elems[0].text if elems else ""
+
+
+def get_current_time():
+    return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 
 def selected_elems(driver: WebDriver, by: str, selector: str) -> list[WebElement]:
