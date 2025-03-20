@@ -2,6 +2,8 @@ import sqlite3
 
 import pandas as pd
 from bs4 import BeautifulSoup
+from icecream import ic
+from pandas.errors import DatabaseError
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.chrome.options import Options
@@ -50,8 +52,8 @@ def is_element_exist(driver: WebDriver, by: str, selector: str) -> bool:
     return True
 
 
-def to_database(name: str, table_name: str, datas: list[any]):  # type: ignore
-    conn = sqlite3.connect(f"{name}.db")
+def to_database(database: str, table_name: str, datas: list[any]):  # type: ignore
+    conn = sqlite3.connect(f"{database}.db")
 
     df = pd.DataFrame(datas)
 
@@ -61,26 +63,42 @@ def to_database(name: str, table_name: str, datas: list[any]):  # type: ignore
     return df
 
 
-# 허용되지 않는 문자 제거 함수
-def remove_illegal_chars(text):  # type: ignore
-    if isinstance(text, str):
-        # 제어 문자 제거 (ASCII 0~31)
-        return text.translate(str.maketrans("", "", "".join(map(chr, range(32)))))
-    return text  # type: ignore
+def get_count_table(database: str, tablename: str):
+    conn = sqlite3.connect(f"{database}.db")
+    cnt = 0
+    try:
+        df = pd.read_sql_query(con=conn, sql=f"SELECT count(*) AS cnt FROM {tablename}")
+        cnt = int(df["cnt"].iloc[0])  # type: ignore
+    except DatabaseError:
+        ic(tablename + "추출 & 수집 전입니다.")
+    finally:
+        conn.close()
 
-
-def to_excel(name: str, datas: list[any]):  # type: ignore
-    df = pd.DataFrame(datas)
-    df = df.map(remove_illegal_chars)
-
-    df.to_excel(f"{name}.xlsx", index=False)
+    return cnt
 
 
 def get_text_or_empty_in_bs(bs: BeautifulSoup, selector: str):
     app_title = bs.select_one(selector)
     if app_title:
-        app_title = str(app_title.text)
+        app_title = str(object=app_title.text)
     else:
         app_title = ""
 
     return app_title
+
+
+# 허용되지 않는 문자 제거 함수
+def remove_illegal_chars(text: str):
+    if isinstance(text, str):  # type: ignore
+        # 제어 문자 제거 (ASCII 0~31)
+        return text.translate(str.maketrans("", "", "".join(map(chr, range(32)))))
+
+    return text
+
+
+def to_excel(sql: str, filename: str):
+    conn = sqlite3.connect("multi-crawler.db")
+    df = pd.read_sql_query(sql, conn)
+    df = df.applymap(remove_illegal_chars)  # type: ignore
+
+    df.to_excel(filename)

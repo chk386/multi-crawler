@@ -7,7 +7,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.ui import WebDriverWait
-from utils import (
+
+from multi_crawler.crawler.utils import (
     get_text_or_empty,
     get_webdriver,
     is_element_exist,
@@ -93,11 +94,11 @@ def get_agency_info(driver: WebDriver, page: WebElement):
     return data
 
 
-def do_agencies_info_crawling():
+def do_agencies_info_crawling(is_headless: bool):
     print("에이전시 목록 크롤링 시작합니다.")
     start_time = time.time()
     datas: list[dict[str, str | int | datetime]] = []
-    driver = get_webdriver()
+    driver = get_webdriver(is_headless)
 
     try:
         # 디자이너샵(에이전시) 목록 페이지

@@ -2,11 +2,12 @@
 
 import time
 
-from icecream import ic
 import requests
+from icecream import ic
 from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.common.by import By
-from utils import (
+
+from multi_crawler.crawler.utils import (
     get_webdriver,
     selected_elems,
     to_database,  # type: ignore
