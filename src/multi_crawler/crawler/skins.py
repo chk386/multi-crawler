@@ -1,45 +1,44 @@
-import time
+from __future__ import annotations
 
+import time
+from collections.abc import Callable
+
+import icecream
 import requests
-from icecream import ic
 from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.common.by import By
 
 from multi_crawler.crawler.utils import (
+    get_user_data_path,
     get_webdriver,
     selected_elems,
-    get_current_time,
+    to_database,  # type: ignore
 )
 
-from customtkinter import CTkTextbox
-
 categories = [
-    236,
-    240,
-    1006,
-    1003,
-    239,
-    1004,
-    237,
-    1002,
-    803,
-    823,
-    233,
-    243,
-    232,
-    234,
     1005,
-    242,
-    238,
+    # 236,
+    # 240,
+    # 1006,
+    # 1003,
+    # 239,
+    # 1004,
+    # 237,
+    # 1002,
+    # 803,
+    # 823,
+    # 233,
+    # 243,
+    # 232,
+    # 234,
+    # 242,
+    # 238,
 ]
 
 
-def get_all_skin_codes(
-    is_headless: bool, delay_time: int, textbox: CTkTextbox
-) -> set[str]:
-    textbox.insert("end", f"{get_current_time()} : 스킨 코드 크롤링 시작!")
-
-    ic("스킨 코드 크롤링 시작!")
+# FIXME: delay_time 적용해야함
+def get_all_skin_codes(is_headless: bool, delay_time: int, log) -> set[str]:  # type: ignore
+    log("스킨 코드 크롤링 시작!\n")
 
     start_time = time.time()
 
@@ -50,7 +49,7 @@ def get_all_skin_codes(
         # 스킨 카테고리 조회 페이지
         for no in categories:
             url = f"https://d.cafe24.com/category?display=PTMD&no={no}"
-            ic(f"스킨 카테고리 목록 url : {url}\n")
+            log(f"스킨 카테고리 목록 url : {url}")
 
             driver.get(url=url)
 
@@ -58,19 +57,27 @@ def get_all_skin_codes(
             move_scroll(driver)
 
             results = get_skin_codes(driver)
-            ic(f"스킨 코드 카운트 : {len(results)}, categoryNo : {no}\n")
+            log(f"카테고리번호 [{no}] 스킨 총 카운트 : {len(results)}")
 
             skin_codes.update(results)
 
     except:
-        ic("스킨킨 크롤링 중 에러 발생\n스냅샷 생성")
-        driver.save_screenshot("screenshot-error.png")
+        screenshot = f"{get_user_data_path()}/screenshot-error.png"
+        driver.save_screenshot(screenshot)
+
+        log(
+            f"""
+            =====================================
+            크롤링 과정에서 오류가 발생하였습니다.
+            f"에러 스크린샷 확인 : {screenshot}"
+            =====================================
+        """.strip()
+        )
 
         raise
     finally:
-        ic("스킨 크롤링을 종료합니다.\n")
         end_time = time.time()
-        ic(f"스킨 목록 크롤링 소요시간 : {end_time - start_time:.2f}초")
+        log(f"스킨 목록 크롤링 소요시간 : {end_time - start_time:.2f}초\n")
 
         driver.quit()
 
@@ -99,7 +106,7 @@ def move_scroll(driver: WebDriver):
 
     while True:
         for _ in range(0, 5):
-            # 스크롤 내리기c
+            # 스크롤 내리기
             driver.execute_script("window.scrollBy(0, 200);")
 
             # 페이지 로딩 대기
@@ -123,10 +130,11 @@ def extract(line: str, sep: str) -> str:
     return ""
 
 
-def extract_skin_infos(codes: set[str]):
+def extract_skin_infos(codes: set[str], delay_time: int, log: Callable[[str], None]):
     datas: list[dict[str, str | int | float]] = []
 
     for code in codes:
+        time.sleep(delay_time)
         url = f"https://d.cafe24.com/product/product_detail?productCode={code}"
 
         response = requests.get(
@@ -195,24 +203,27 @@ def extract_skin_infos(codes: set[str]):
                         "create_at": created_at,
                     }
 
-                    print(f"스킨별 정보 추출 : {skin_name}")
+                    log(f"스킨별 정보 추출 : {skin_name}, url : {url}")
 
                     datas.append(data)
 
-        return datas
+    log("스킨 추출이 완료되었습니다.\n")
+    log(f"총 {len(codes)} 건 추출하였습니다.")
+
+    return datas
 
 
-def extract_skins(params: tuple[bool, int, CTkTextbox]):
-    is_headless, delay_time, textbox = params
-
-    codes = get_all_skin_codes(is_headless, delay_time, textbox)
+def extract_skins(is_headless: bool, delay_time: int, log: Callable[[str], None]):
+    codes = get_all_skin_codes(is_headless, delay_time, log)
     to_database("multi-crawler", "skin_codes", codes)  # type: ignore
 
-    skin_datas = extract_skin_infos(codes)
+    skin_datas = extract_skin_infos(codes, delay_time, log)
     to_database("multi-crawler", "skin_info", skin_datas)  # type: ignore
+
+    log("refresh")
 
 
 if __name__ == "__main__":
     print("스킨 크롤링을 시작합니다.")
 
-    # extract_skins(False)
+    extract_skins(False, 0, icecream.ic)  # type: ignore

@@ -1,5 +1,5 @@
-from datetime import datetime
 import sqlite3
+from datetime import datetime
 from pathlib import Path
 
 import pandas as pd
@@ -16,12 +16,14 @@ from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.ui import WebDriverWait
 
 
-def get_chrome_user_data():
-    chrome_user_data_dir = str(user_data_dir("multi-crawler"))  # type: ignore
-    directory_path = Path(chrome_user_data_dir)
+def get_user_data_path():
+    user_data_path = str(user_data_dir("multi-crawler"))  # type: ignore
+    directory_path = Path(user_data_path)
     directory_path.mkdir(parents=True, exist_ok=True)
 
-    return chrome_user_data_dir
+    ic(user_data_path)
+
+    return user_data_path
 
 
 def get_webdriver(is_headless: bool = False):
@@ -30,7 +32,7 @@ def get_webdriver(is_headless: bool = False):
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--disable-blink-features=AutomationControlled")
-    chrome_options.add_argument(f"user-data-dir={get_chrome_user_data()}")
+    # chrome_options.add_argument(f"user-data-dir={get_user_data_path()}")
 
     # 브로우저가 자동 종료 방지 옵션
     chrome_options.add_experimental_option("detach", True)
@@ -68,8 +70,10 @@ def is_element_exist(driver: WebDriver, by: str, selector: str) -> bool:
 
 
 def to_database(database: str, table_name: str, datas: list[any]):  # type: ignore
-    conn = sqlite3.connect(f"{database}.db")
+    if len(datas) == 0:
+        return
 
+    conn = sqlite3.connect(f"{database}.db")
     df = pd.DataFrame(datas)
 
     df.to_sql(table_name, conn, if_exists="replace", index=False, chunksize=1000)

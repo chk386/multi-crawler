@@ -1,6 +1,7 @@
 from functools import wraps
 from time import time
 from typing import no_type_check
+from tkinter import font
 
 
 @no_type_check
@@ -37,3 +38,11 @@ def throttle(delay: int):
         return wrapper
 
     return decorator
+
+
+def printFontList():
+    font_list = list(font.families())
+    font_list.sort()
+
+    for font_name in font_list:
+        print(font_name)

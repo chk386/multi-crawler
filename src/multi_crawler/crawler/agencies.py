@@ -1,4 +1,5 @@
 import time
+from collections.abc import Callable
 from datetime import datetime
 from urllib.parse import parse_qs, urlparse
 
@@ -11,18 +12,16 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 from multi_crawler.crawler.utils import (
     get_text_or_empty,
+    get_user_data_path,
     get_webdriver,
     is_element_exist,
     selected_elems,
     to_database,  # type: ignore
 )
 
-sleep_time = 0
-
 
 def get_agency_info(driver: WebDriver, page: WebElement):
     agency_url = driver.current_url
-    ic(f"에이전시 페이지 : {agency_url}")
 
     url_parsed = urlparse(agency_url)
     query_params = parse_qs(url_parsed.query)
@@ -95,19 +94,21 @@ def get_agency_info(driver: WebDriver, page: WebElement):
     return data
 
 
-def do_agencies_info_crawling(is_headless: bool):
-    ic("에이전시 목록 크롤링 시작합니다.")
+def do_agencies_info_crawling(
+    is_headless: bool, delay_time: int, log: Callable[[str], None]
+):
+    log("에이전시 정보 크롤링 시작합니다.\n")
     start_time = time.time()
     datas: list[dict[str, str | int | datetime]] = []
     driver = get_webdriver(is_headless)
 
     try:
         # 디자이너샵(에이전시) 목록 페이지
-        page_no = 1
+        page_no = 15
 
         while True:
             url = f"https://d.cafe24.com/designer/designer_main?safety=Y&order=REG_ASC&pageNo={page_no}&isActive=T"
-            ic(f"페이지번호 : {page_no}, url : {url}")
+            log(f"페이지번호 : {page_no}, url : {url}")
 
             page_no += 1
             driver.get(url)
@@ -118,6 +119,8 @@ def do_agencies_info_crawling(is_headless: bool):
 
             designer_links = selected_elems(driver, By.CLASS_NAME, "shop-link")
 
+            time.sleep(delay_time)
+
             # 디자이너샵 목록 순회하여 해당 엘리먼트 클릭
             for i in range(len(designer_links)):
                 # url이 변경되었다가 다시 돌아오기 때문에 다시 elements를 가져와야 함
@@ -127,7 +130,7 @@ def do_agencies_info_crawling(is_headless: bool):
                     "shop-link",  # + 디자이너샵 바로가기 버튼 셀렉트
                 )
 
-                time.sleep(sleep_time)
+                time.sleep(delay_time)
 
                 designer_link = designer_links[i]
                 designer_link.click()
@@ -141,28 +144,43 @@ def do_agencies_info_crawling(is_headless: bool):
                 datas.append(get_agency_info(driver, page))
 
                 # 디자이너 목록 페이지로 이동
+                log(f"에이전시 상세 페이지 : {url}")
                 driver.get(url=url)
 
     except:
-        ic("에이전시 크롤링 중 에러 발생")
+        screenshot = f"{get_user_data_path()}/screenshot-error.png"
+        driver.save_screenshot(screenshot)
+
+        log(
+            f"""
+            =====================================
+            크롤링 과정에서 오류가 발생하였습니다.
+            f"에러 스크린샷 확인 : {screenshot}"
+            =====================================
+        """.strip()
+        )
+
         raise
     finally:
-        ic(f"총 {len(datas)}개의 에이전시 정보를 저장하였습니다.")
-        ic("에이전시 크롤링을 종료합니다.")
+        log(f"총 {len(datas)}개의 에이전시 정보를 저장하였습니다.")
+        log("에이전시 크롤링을 종료합니다. \n")
         end_time = time.time()
-        ic(f"에이전시 목록 크롤링 소요시간 : {end_time - start_time:.2f}초")
+        log(f"크롤링 총 소요시간 : {end_time - start_time:.2f}초")
         # 브라우저 종료
         driver.quit()
 
     return datas
 
 
-def extract_agencies(is_headless: bool):
-    datas: list[dict[str, str | int | datetime]] = do_agencies_info_crawling(
-        is_headless
+def extract_agencies(is_headless: bool, delay_time: int, log: Callable[[str], None]):
+    to_database(
+        "multi-crawler",
+        "agency_info",
+        do_agencies_info_crawling(is_headless, delay_time, log),
     )
-    to_database("multi-crawler", "agency_info", datas)
+
+    log("refresh")
 
 
-if __name__ == "__main__":
-    extract_agencies(False)
+# if __name__ == "__main__":
+# extract_agencies(False)
