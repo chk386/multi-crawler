@@ -104,7 +104,7 @@ def do_agencies_info_crawling(
 
     try:
         # 디자이너샵(에이전시) 목록 페이지
-        page_no = 15
+        page_no = 1
 
         while True:
             url = f"https://d.cafe24.com/designer/designer_main?safety=Y&order=REG_ASC&pageNo={page_no}&isActive=T"
@@ -180,7 +180,3 @@ def extract_agencies(is_headless: bool, delay_time: int, log: Callable[[str], No
     )
 
     log("refresh")
-
-
-# if __name__ == "__main__":
-# extract_agencies(False)

@@ -1,8 +1,8 @@
 import time
+from collections.abc import Callable
 
 import requests
 from bs4 import BeautifulSoup
-from icecream import ic
 
 from multi_crawler.crawler.utils import (
     get_text_or_empty_in_bs,
@@ -41,15 +41,13 @@ headers = {
 }
 
 
-sleep_time = 0
-
-
-def extract_app_urls(page: int) -> list[str]:
+def extract_app_urls(delay_time: int, log: Callable[[str], None]) -> list[str]:
+    page = 1
     uris = list[str]()
-    ic("앱 주소 조회 시작!\n")
+    log("앱 주소 조회 시작!\n")
 
     while True:
-        time.sleep(sleep_time)
+        time.sleep(delay_time)
 
         params = {
             "page": str(page),
@@ -65,8 +63,8 @@ def extract_app_urls(page: int) -> list[str]:
         )
 
         if not response.text.strip():
-            ic("앱 주소 조회 - 끝!")
-            ic(f"\n추출된 앱 갯수 : {len(uris)}")
+            log("앱 주소 조회 - 끝!")
+            log(f"추출 대상 총 : {len(uris)} 건\n")
             return uris
 
         if response.status_code == 200:
@@ -75,7 +73,8 @@ def extract_app_urls(page: int) -> list[str]:
             bs = soup.select(selector=".inner >.js-gtm-search-app")
 
             uri = [str(b.get("href")) for b in bs]
-            ic(f"앱 상세 주소 정보 조회 : {uri}")
+            log(f"앱 상세 주소 정보 조회 : {uri}")
+
             uris.extend(uri)
 
         else:
@@ -84,12 +83,17 @@ def extract_app_urls(page: int) -> list[str]:
         page += 1
 
 
-def extrace_app_infos(app_paths: list[str]):
+def extrace_app_infos(
+    app_paths: list[str], delay_time: int, log: Callable[[str], None]
+):
     datas = list[dict[str, str]]()
-    ic("앱 정보 추출 시작!\n")
+    log("앱 정보 추출 시작!\n")
+
     for path in app_paths:
+        time.sleep(delay_time)
+
         url = f"https://store.cafe24.com{path}"
-        ic(f"앱 상세 url : {url}")
+        log(f"앱 상세 url : {url}")
 
         response = requests.get(
             url,
@@ -119,16 +123,16 @@ def extrace_app_infos(app_paths: list[str]):
         else:
             continue
 
+    log(f"{len(datas)} 건 추출 완료")
+
     return datas
 
 
-def extract_apps():
-    app_paths = extract_app_urls(page=1)
+def extract_apps(_: bool, delay_time: int, log: Callable[[str], None]):
+    app_paths = extract_app_urls(delay_time, log)
     to_database("multi-crawler", "app_uris", app_paths)
 
-    app_infos = extrace_app_infos(app_paths)
+    app_infos = extrace_app_infos(app_paths, delay_time, log)
     to_database("multi-crawler", "app_info", app_infos)
 
-
-if __name__ == "__main__":
-    extract_apps()
+    log("refresh")

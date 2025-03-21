@@ -17,26 +17,25 @@ from multi_crawler.crawler.utils import (
 
 categories = [
     1005,
-    # 236,
-    # 240,
-    # 1006,
-    # 1003,
-    # 239,
-    # 1004,
-    # 237,
-    # 1002,
-    # 803,
-    # 823,
-    # 233,
-    # 243,
-    # 232,
-    # 234,
-    # 242,
-    # 238,
+    236,
+    240,
+    1006,
+    1003,
+    239,
+    1004,
+    237,
+    1002,
+    803,
+    823,
+    233,
+    243,
+    232,
+    234,
+    242,
+    238,
 ]
 
 
-# FIXME: delay_time 적용해야함
 def get_all_skin_codes(is_headless: bool, delay_time: int, log) -> set[str]:  # type: ignore
     log("스킨 코드 크롤링 시작!\n")
 

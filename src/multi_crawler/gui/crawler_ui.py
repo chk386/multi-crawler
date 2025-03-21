@@ -1,13 +1,10 @@
 import math
 import queue
 import threading
-import time
 import tkinter
 import tkinter.messagebox
-from tkinter import font
 from datetime import datetime
 from enum import Enum
-from tkinter import filedialog
 
 from customtkinter import *
 from icecream import ic
@@ -33,6 +30,7 @@ class ButtonType(Enum):
 class App(CTk):
     entry_text = " : %s 건"
     log_queue = queue.Queue[str]()
+    is_loading = False
 
     def __init__(self) -> None:
         super().__init__()
@@ -67,7 +65,7 @@ class App(CTk):
         # self.textbox.delete("2.0", "end")
 
         # 랜더링
-        self._render_entry_data()
+        self._render()
 
     def _init_app(self):
         set_appearance_mode("Light")  # Modes: "System" (standard), "Dark", "Light"
@@ -221,7 +219,7 @@ class App(CTk):
 
         self.slider_label.grid(row=2, column=1, padx=0, pady=(20, 20))
 
-    def _render_entry_data(self):
+    def _render(self):
         db = "multi-crawler"
 
         type_to_stringvar = {
@@ -237,8 +235,16 @@ class App(CTk):
             stringvar.set(self._get_entry_text(text, cnt))
 
         self.slider_label_text = 0
+        self.is_loading = False
 
     def _save_file(self, type: ButtonType):
+        if self.is_loading:
+            tkinter.messagebox.showwarning(
+                "실행중!", "실행중인 작업이 있습니다. 완료 후 다시 클릭해주세요."
+            )
+
+            return
+
         """파일 저장 대화상자를 열고 파일을 저장하는 함수"""
         # 파일 저장 대화상자 열기
         file_path = filedialog.asksaveasfilename(
@@ -272,14 +278,20 @@ class App(CTk):
         return self.switch.get() != 1
 
     def _extract_data(self, type: ButtonType):
-        # 프로그래스 시작
+        if self.is_loading:
+            tkinter.messagebox.showwarning(
+                "실행중!", "실행중인 작업이 있습니다. 완료 후 다시 클릭해주세요."
+            )
+
+            return
+
+        self.is_loading = True
+
         args = (self._is_headless(), self.slider_label_text, self.log)
         self.clear_log()
 
-        # fixme: is_headless, delay, log
         if type == ButtonType.SKIN:
             callback = extract_skins  # type: ignore
-
         elif type == ButtonType.AGENCY:
             callback = extract_agencies  # type: ignore
         else:
@@ -289,8 +301,6 @@ class App(CTk):
         crawl_thread = threading.Thread(target=callback, args=args)  # type: ignore
         crawl_thread.daemon = True  # 메인 프로그램 종료시 스레드도 종료
         crawl_thread.start()
-
-        # 프로스레스 종료
 
     @throttle(delay=500)
     def _slider_change_event(self, value: float):
@@ -302,7 +312,7 @@ class App(CTk):
 
     def log(self, message: str):
         if message == "refresh":
-            self._render_entry_data()
+            self._render()
         else:
             log_message = f"{datetime.now().strftime("%Y-%m-%d %H:%M:%S")} : {message}"
             ic(log_message)
@@ -323,8 +333,3 @@ class App(CTk):
         """로그 텍스트박스 내용 지우기"""
         self.textbox.delete("0.0", "end")
         self.textbox.insert("0.0", text="로그 출력\n\n")
-
-
-if __name__ == "__main__":
-    app = App()
-    app.mainloop()
