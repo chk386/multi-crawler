@@ -8,6 +8,8 @@
     "reportUnknownParameterType": "none",
     "reportUnknownArgumentType": "none",
     "reportUnknownVariableType": "none",
+    "reportArgumentType": "none",
+    "reportCallIssue": "none",
   },
   "ruff.lineLength": 88,
   "editor.formatOnSave": true,

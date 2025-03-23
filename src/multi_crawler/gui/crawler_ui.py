@@ -7,8 +7,8 @@ from datetime import datetime
 from enum import Enum
 
 from customtkinter import *
-from icecream import ic
 
+from multi_crawler.config.logging import logger
 from multi_crawler.crawler.agencies import extract_agencies
 from multi_crawler.crawler.apps import extract_apps
 from multi_crawler.crawler.skins import extract_skins
@@ -68,6 +68,7 @@ class App(CTk):
         self._render()
 
     def _init_app(self):
+        logger.info("App 함수 ")
         set_appearance_mode("Light")  # Modes: "System" (standard), "Dark", "Light"
         set_default_color_theme(
             "blue"
@@ -259,14 +260,14 @@ class App(CTk):
         # 파일 경로가 선택되었는지 확인
         if file_path:
             try:
-                ic("저장될 파일 경로 : " + file_path)
+                logger.info("저장될 파일 경로 : %s", file_path)
                 to_excel(f"SELECT * FROM {type.tablename}", file_path)
 
                 tkinter.messagebox.showinfo(
                     "다운로드 완료", f"{file_path}로 저장이 완료 되었습니다."
                 )
             except Exception as e:
-                ic(e)
+                logger.error(e)
                 tkinter.messagebox.showerror("다운로드 실패", f"{e} 에러 발생")
         else:
             tkinter.messagebox.showwarning("다운로드 취소", "취소 완료")
@@ -309,14 +310,13 @@ class App(CTk):
 
         self.slider_label.configure(text=str(sec) + "초 지연 추출")
         self.slider_label_text = sec
-        ic(self.slider_label_text)
 
     def log(self, message: str):
         if message == "refresh":
             self._render()
         else:
             log_message = f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} : {message}"
-            ic(log_message)
+            logger.info(message)
 
             self.log_queue.put(item=log_message)
 

@@ -4,10 +4,10 @@ import time
 from collections.abc import Callable
 
 import requests
-from icecream import ic
 from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.common.by import By
 
+from multi_crawler.config.logging import logger
 from multi_crawler.crawler.utils import (
     get_user_data_path,
     get_webdriver,
@@ -97,7 +97,7 @@ def get_skin_codes(driver: WebDriver) -> set[str]:
 
         skin_codes.append(skin_code)
 
-    print(f"스킨 코드 목록 : {skin_codes}")
+    logger.info(f"스킨 코드 목록 : {skin_codes}")
 
     return set(skin_codes)
 
@@ -222,9 +222,3 @@ def extract_skins(is_headless: bool, delay_time: int, log: Callable[[str], None]
     to_database("multi-crawler", "skin_info", skin_datas)
 
     log("refresh")
-
-
-if __name__ == "__main__":
-    print("스킨 크롤링을 시작합니다.")
-
-    extract_skins(False, 0, ic)  # type: ignore

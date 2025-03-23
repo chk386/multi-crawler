@@ -3,7 +3,6 @@ from collections.abc import Callable
 from datetime import datetime
 from urllib.parse import parse_qs, urlparse
 
-from icecream import ic
 from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
