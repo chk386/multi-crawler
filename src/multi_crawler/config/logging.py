@@ -1,21 +1,27 @@
 import logging
 import os
+import sys
 from logging.handlers import RotatingFileHandler
 
 from dotenv import load_dotenv
 
-if os.getenv("ENV") == "production":
-    load_dotenv(".env.prod")
+if getattr(sys, "frozen", False):
+    os.environ["ENV"] = "production"
+    dotenv_path = os.path.join(sys._MEIPASS, ".env.prod")  # type: ignore
+    load_dotenv(dotenv_path)
+    log_file = f"{os.path.dirname(sys.executable)}/{os.getenv('LOG_FILE')}"
+
 else:
     load_dotenv(".env.local")
+    log_file = os.getenv("LOG_FILE")
+
 
 # 환경 변수 사용
 DEBUG = os.getenv("DEBUG") == "True"
 LOG_LEVEL = os.getenv("LOG_LEVEL")
-LOG_FILE = os.getenv("LOG_FILE")
 
 # 로그 파일 디렉토리 생성
-os.makedirs(name=os.path.dirname(LOG_FILE), exist_ok=True)
+os.makedirs(name=os.path.dirname(log_file), exist_ok=True)
 
 # 로그 포맷 설정
 formatter = logging.Formatter(
@@ -26,7 +32,7 @@ formatter = logging.Formatter(
 
 # 파일 핸들러 (로그 로테이션)
 file_handler = RotatingFileHandler(
-    LOG_FILE,
+    log_file,
     maxBytes=1024 * 1024 * 10,
     backupCount=5,
 )
