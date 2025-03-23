@@ -6,7 +6,6 @@ from multi_crawler.crawler.utils import generate_random_float
 def test_랜덤_지연시간():
     # given : 초기 조건 설정
     start, end = 0, 5
-    print("hihi")
 
     for _ in range(0, 100):
         # when : 테스트 대상 실행
