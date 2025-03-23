@@ -12,8 +12,8 @@ from icecream import ic
 from multi_crawler.crawler.agencies import extract_agencies
 from multi_crawler.crawler.apps import extract_apps
 from multi_crawler.crawler.skins import extract_skins
-from multi_crawler.crawler.utils import get_count_table, to_excel
-from multi_crawler.gui.gui_utils import throttle  # type: ignore
+from multi_crawler.crawler.utils import generate_random_float, get_count_table, to_excel
+from multi_crawler.gui.gui_utils import throttle
 
 
 class ButtonType(Enum):
@@ -286,19 +286,20 @@ class App(CTk):
             return
 
         self.is_loading = True
+        delay_time = generate_random_float(0, self.slider_label_text)
 
-        args = (self._is_headless(), self.slider_label_text, self.log)
+        args = (self._is_headless(), delay_time, self.log)
         self.clear_log()
 
         if type == ButtonType.SKIN:
-            callback = extract_skins  # type: ignore
+            callback = extract_skins
         elif type == ButtonType.AGENCY:
-            callback = extract_agencies  # type: ignore
+            callback = extract_agencies
         else:
             callback = extract_apps
 
         # 별도 스레드에서 크롤링 실행
-        crawl_thread = threading.Thread(target=callback, args=args)  # type: ignore
+        crawl_thread = threading.Thread(target=callback, args=args)
         crawl_thread.daemon = True  # 메인 프로그램 종료시 스레드도 종료
         crawl_thread.start()
 
@@ -314,7 +315,7 @@ class App(CTk):
         if message == "refresh":
             self._render()
         else:
-            log_message = f"{datetime.now().strftime("%Y-%m-%d %H:%M:%S")} : {message}"
+            log_message = f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} : {message}"
             ic(log_message)
 
             self.log_queue.put(item=log_message)

@@ -3,12 +3,29 @@
   "python.analysis.diagnosticSeverityOverrides": {
     "reportMissingTypeStubs": "none",
     "reportUnknownMemberType": "none",
-    "reportWildcardImportFromLibrary": "none"
+    "reportWildcardImportFromLibrary": "none",
+    "reportGeneralTypeIssues": "none",
+    "reportUnknownParameterType": "none",
+    "reportUnknownArgumentType": "none",
+    "reportUnknownVariableType": "none",
   },
-
   "ruff.lineLength": 88,
   "editor.formatOnSave": true,
   "ruff.organizeImports": true,
   "ruff.enable": true,
-  "python.analysis.extraPaths": ["./src"]
+  "python.analysis.extraPaths": [
+    "./src"
+  ],
+  "python.testing.pytestArgs": [
+    "tests",
+    "-s"
+  ],
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestEnabled": true,
+  "[python]": {
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "always"
+    },
+    "editor.defaultFormatter": "charliermarsh.ruff"
+  },
 }

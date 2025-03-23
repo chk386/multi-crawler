@@ -16,6 +16,7 @@ dependencies = [
     "icecream (>=2.1.4,<3.0.0)",
     "pillow (>=11.1.0,<12.0.0)",
     "appdirs (>=1.4.4,<2.0.0)",
+    "pyinstaller (>=6.12.0,<7.0.0)",
 ]
 
 [tool.poetry]
@@ -43,7 +44,7 @@ ignore = [
 
 [tool.ruff.per-file-ignores]
 # 특정 파일에 대한 린팅 규칙 무시
-"tests/*" = ["E501"] # 테스트 파일에서 줄 길이 제한 무시
+"tests/*" = ["E501", "N802"] # 테스트 파일에서 줄 길이 제한 무시
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.5"

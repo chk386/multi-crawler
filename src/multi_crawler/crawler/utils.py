@@ -1,9 +1,10 @@
+import random
 import sqlite3
 from datetime import datetime
 from pathlib import Path
 
 import pandas as pd
-from appdirs import user_data_dir  # type: ignore
+from appdirs import user_data_dir
 from bs4 import BeautifulSoup
 from icecream import ic
 from pandas.errors import DatabaseError
@@ -17,7 +18,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 
 def get_user_data_path():
-    user_data_path = str(user_data_dir("multi-crawler"))  # type: ignore
+    user_data_path = str(user_data_dir("multi-crawler"))
     directory_path = Path(user_data_path)
     directory_path.mkdir(parents=True, exist_ok=True)
 
@@ -32,7 +33,7 @@ def get_webdriver(is_headless: bool = False):
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--disable-blink-features=AutomationControlled")
-    # chrome_options.add_argument(f"user-data-dir={get_user_data_path()}")
+    chrome_options.add_argument(f"user-data-dir={get_user_data_path()}")
 
     # 브로우저가 자동 종료 방지 옵션
     chrome_options.add_experimental_option("detach", True)
@@ -69,7 +70,7 @@ def is_element_exist(driver: WebDriver, by: str, selector: str) -> bool:
     return True
 
 
-def to_database(database: str, table_name: str, datas: list[any]):  # type: ignore
+def to_database(database: str, table_name: str, datas: list[any] | set[str]):
     if len(datas) == 0:
         return
 
@@ -87,7 +88,7 @@ def get_count_table(database: str, tablename: str):
     cnt = 0
     try:
         df = pd.read_sql_query(con=conn, sql=f"SELECT count(*) AS cnt FROM {tablename}")
-        cnt = int(df["cnt"].iloc[0])  # type: ignore
+        cnt = int(df["cnt"].iloc[0])
     except DatabaseError:
         ic(tablename + "추출 & 수집 전입니다.")
     finally:
@@ -108,11 +109,8 @@ def get_text_or_empty_in_bs(bs: BeautifulSoup, selector: str):
 
 # 허용되지 않는 문자 제거 함수
 def remove_illegal_chars(text: str):
-    if isinstance(text, str):  # type: ignore
-        # 제어 문자 제거 (ASCII 0~31)
-        return text.translate(str.maketrans("", "", "".join(map(chr, range(32)))))
-
-    return text
+    # 제어 문자 제거 (ASCII 0~31)
+    return text.translate(str.maketrans("", "", "".join(map(chr, range(32)))))
 
 
 def to_excel(sql: str, filename: str):
@@ -121,3 +119,7 @@ def to_excel(sql: str, filename: str):
     df = df.applymap(remove_illegal_chars)  # type: ignore
 
     df.to_excel(filename)
+
+
+def generate_random_float(start: float, end: float):
+    return round(random.uniform(start, end), 1)

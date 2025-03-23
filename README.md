@@ -25,9 +25,4 @@ asdf install python 3.13.0 --enable-framework # tk개발 라이브러리를 포�
 
 셀레니움 4.6이후부터 웹드라이버를 자동으로 받는다고함
 
-## 기능 추가
 
-https://d.cafe24.com/product/product_detail?productCode=PTMD272651
-
-해당 디자인을 적용한 쇼핑몰 링크 따자
-최대 4개일듯

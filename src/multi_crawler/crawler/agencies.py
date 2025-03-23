@@ -16,7 +16,7 @@ from multi_crawler.crawler.utils import (
     get_webdriver,
     is_element_exist,
     selected_elems,
-    to_database,  # type: ignore
+    to_database,
 )
 
 

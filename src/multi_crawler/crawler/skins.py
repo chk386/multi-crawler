@@ -3,8 +3,8 @@ from __future__ import annotations
 import time
 from collections.abc import Callable
 
-import icecream
 import requests
+from icecream import ic
 from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.common.by import By
 
@@ -12,7 +12,7 @@ from multi_crawler.crawler.utils import (
     get_user_data_path,
     get_webdriver,
     selected_elems,
-    to_database,  # type: ignore
+    to_database,
 )
 
 categories = [
@@ -36,7 +36,9 @@ categories = [
 ]
 
 
-def get_all_skin_codes(is_headless: bool, delay_time: int, log) -> set[str]:  # type: ignore
+def get_all_skin_codes(
+    is_headless: bool, delay_time: int, log: Callable[[str], None]
+) -> set[str]:
     log("스킨 코드 크롤링 시작!\n")
 
     start_time = time.time()
@@ -111,7 +113,7 @@ def move_scroll(driver: WebDriver):
             # 페이지 로딩 대기
             time.sleep(0.1)
 
-        current_scroll_y = int(driver.execute_script("return window.scrollY;"))  # type: ignore
+        current_scroll_y = int(driver.execute_script("return window.scrollY;"))
 
         # 스크롤 변화가 없을경우 탈출
         if scroll_y == current_scroll_y:
@@ -214,10 +216,10 @@ def extract_skin_infos(codes: set[str], delay_time: int, log: Callable[[str], No
 
 def extract_skins(is_headless: bool, delay_time: int, log: Callable[[str], None]):
     codes = get_all_skin_codes(is_headless, delay_time, log)
-    to_database("multi-crawler", "skin_codes", codes)  # type: ignore
+    to_database("multi-crawler", "skin_codes", codes)
 
     skin_datas = extract_skin_infos(codes, delay_time, log)
-    to_database("multi-crawler", "skin_info", skin_datas)  # type: ignore
+    to_database("multi-crawler", "skin_info", skin_datas)
 
     log("refresh")
 
@@ -225,4 +227,4 @@ def extract_skins(is_headless: bool, delay_time: int, log: Callable[[str], None]
 if __name__ == "__main__":
     print("스킨 크롤링을 시작합니다.")
 
-    extract_skins(False, 0, icecream.ic)  # type: ignore
+    extract_skins(False, 0, ic)  # type: ignore

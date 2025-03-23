@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 
 from multi_crawler.crawler.utils import (
     get_text_or_empty_in_bs,
-    to_database,  # type: ignore
+    to_database,
 )
 
 cookies = {
