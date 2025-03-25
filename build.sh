@@ -13,6 +13,7 @@ else
 fi
 
 # PyInstaller 실행
-pyinstaller --onefile --noconfirm --add-data ".env.prod:." --icon="$ICON" ./src/main.py
+# pyinstaller --onefile --noconfirm --add-data ".env.prod:." --icon="$ICON" ./src/main.py
+pyinstaller  --windowed --noconfirm --add-data ".env.prod:." --icon="$ICON" ./src/main.py
 
 echo "Build completed with icon: $ICON"
