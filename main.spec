@@ -32,7 +32,6 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=['assets/multi-crawler.icns'],
 )
 coll = COLLECT(
     exe,
@@ -46,6 +45,6 @@ coll = COLLECT(
 app = BUNDLE(
     coll,
     name='main.app',
-    icon='./assets/multi-crawler.icns',
+    icon=None,
     bundle_identifier=None,
 )
