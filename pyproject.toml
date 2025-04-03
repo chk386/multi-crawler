@@ -18,6 +18,8 @@ dependencies = [
     "appdirs (>=1.4.4,<2.0.0)",
     "pyinstaller (>=6.12.0,<7.0.0)",
     "python-dotenv (>=1.0.1,<2.0.0)",
+    "pyside6 (>=6.9.0,<7.0.0)",
+    "webdriver-manager (>=4.0.2,<5.0.0)",
 ]
 
 [tool.poetry]

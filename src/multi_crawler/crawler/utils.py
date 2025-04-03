@@ -11,10 +11,12 @@ from pandas.errors import DatabaseError
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.ui import WebDriverWait
+from webdriver_manager.chrome import ChromeDriverManager
 
 
 def get_user_data_path():
@@ -33,18 +35,21 @@ def get_webdriver(is_headless: bool = False):
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--disable-blink-features=AutomationControlled")
-    chrome_options.add_argument(f"user-data-dir={get_user_data_path()}")
+    # chrome_options.add_argument(f"user-data-dir={get_user_data_path()}")
 
     # 브로우저가 자동 종료 방지 옵션
-    chrome_options.add_experimental_option("detach", True)
+    # chrome_options.add_experimental_option("detach", True)
     # 콘솔 출력 방지
-    chrome_options.add_experimental_option("excludeSwitches", ["enable-logging"])
+    # chrome_options.add_experimental_option("excludeSwitches", ["enable-logging"])
 
     if is_headless:
         chrome_options.add_argument("--headless")  # 헤드리스 모드 실행
 
+    # 웹드라이버 매니저를 사용하여 자동으로 드라이버 설치 및 관리
+    service = Service(ChromeDriverManager().install())
+
     # WebDriver 설정 (시스템에 설치된 ChromeDriver 사용)
-    return webdriver.Chrome(options=chrome_options)
+    return webdriver.Chrome(service=service, options=chrome_options)
 
 
 def get_text_or_empty(page: WebElement, by: str, value: str) -> str:
