@@ -38,9 +38,9 @@ def get_webdriver(is_headless: bool = False):
     # chrome_options.add_argument(f"user-data-dir={get_user_data_path()}")
 
     # 브로우저가 자동 종료 방지 옵션
-    # chrome_options.add_experimental_option("detach", True)
+    chrome_options.add_experimental_option("detach", True)
     # 콘솔 출력 방지
-    # chrome_options.add_experimental_option("excludeSwitches", ["enable-logging"])
+    chrome_options.add_experimental_option("excludeSwitches", ["enable-logging"])
 
     if is_headless:
         chrome_options.add_argument("--headless")  # 헤드리스 모드 실행
