@@ -2,7 +2,7 @@
 name = "multi-crawler"
 version = "0.1.0"
 description = ""
-authors = [{ name = "haekyu.cho", email = "haekyu.cho@nhn-commerce.com" }]
+authors = [{ name = "chk386@gmail.com", email = "chk386@gmail.com" }]
 readme = "README.md"
 requires-python = ">=3.13.0,<3.14"
 dependencies = [
