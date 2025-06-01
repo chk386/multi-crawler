@@ -182,7 +182,6 @@ tmp/
 
 # Screenshots
 screenshots/
-*.png
 *.jpg
 *.jpeg
 
